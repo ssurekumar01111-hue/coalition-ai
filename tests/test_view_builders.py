@@ -4,15 +4,18 @@ from listeners.views.issue_modal_builder import build_issue_modal
 
 
 def test_build_issue_modal():
-    modal = build_issue_modal("We need laptops and devices for students")
+    category = "We need laptops and devices for students"
+    modal = build_issue_modal(category)
 
     assert modal["type"] == "modal"
     assert modal["callback_id"] == "issue_submission"
+    assert modal["title"]["text"] == "🚀 Start a Mission"
+    assert modal["private_metadata"] == category
 
-    # The initial option should match the selected category
-    category_block = modal["blocks"][0]
-    initial = category_block["element"]["initial_option"]
-    assert initial["value"] == "We need laptops and devices for students"
+    block_ids = [b.get("block_id") for b in modal["blocks"] if "block_id" in b]
+    assert "description_block" in block_ids
+    assert "location_block" in block_ids
+
 
 
 def test_build_feedback_blocks():

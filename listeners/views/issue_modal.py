@@ -1,46 +1,79 @@
 from logging import Logger
 
-from slack_bolt import Ack, BoltContext
+from slack_bolt import Ack
 from slack_sdk import WebClient
+
+from agent import CaseyDeps, run_coalition_agent
+from listeners.views.feedback_builder import build_feedback_blocks
+
+GENERAL_CHANNEL_ID = "C0BBZPN96PK"
 
 
 def handle_issue_submission(
     ack: Ack,
     body: dict,
     client: WebClient,
-    context: BoltContext,
     logger: Logger,
 ):
-    """Handle modal submission: open DM and post the issue message.
-
-    The message event handler picks up the posted message (identified by
-    its ``issue_submission`` metadata) and runs the agent from there.
-    """
+    """Handle modal submission: execute the agent directly and post the result."""
     ack()
-
     try:
-        user_id = context.user_id
-        values = body["view"]["state"]["values"]
-        category = values["category_block"]["category_select"]["selected_option"][
-            "value"
-        ]
-        description = values["description_block"]["description_input"]["value"]
+        description = body["view"]["state"]["values"]["description_block"][
+            "description_input"
+        ]["value"]
+        location = body["view"]["state"]["values"]["location_block"][
+            "location_input"
+        ]["value"]
+        user_id = body["user"]["id"]
 
-        # Open a DM with the user
-        dm = client.conversations_open(users=[user_id])
-        channel_id = dm["channel"]["id"]
+        # Build the need message (avoid duplicating location)
+        full_message = f"{description} in {location}"
 
-        # Post the issue message with metadata so the message handler can
-        # identify it and run the agent on behalf of the original user
-        user_message = f"*Category:* {category}\n*Description:* {description}"
+        # Post the need to #general for visibility
         client.chat_postMessage(
-            channel=channel_id,
-            text=user_message,
-            metadata={
-                "event_type": "issue_submission",
-                "event_payload": {"user_id": user_id},
-            },
+            channel=GENERAL_CHANNEL_ID,
+            text=(
+                f"📋 *New mission submitted via App Home*\n"
+                f"<@{user_id}>: {full_message}"
+            ),
+        )
+
+        # Post a "thinking" indicator
+        thinking = client.chat_postMessage(
+            channel=GENERAL_CHANNEL_ID,
+            text="👀 Coalition AI is assembling your coalition...",
+            thread_ts=None,
+        )
+        thread_ts = thinking["ts"]
+
+        # Run the coalition agent directly
+        deps = CaseyDeps(
+            client=client,
+            user_id=user_id,
+            channel_id=GENERAL_CHANNEL_ID,
+            thread_ts=thread_ts,
+            message_ts=thread_ts,
+            user_token=None,
+        )
+
+        logger.info(
+            f"Modal submission - running agent with message: {full_message}"
+        )
+        result = run_coalition_agent(full_message, deps, message_history=None)
+
+        # Post result to #general as a thread reply
+        client.chat_postMessage(
+            channel=GENERAL_CHANNEL_ID,
+            text=result.output,
+            thread_ts=thread_ts,
         )
 
     except Exception as e:
         logger.exception(f"Failed to handle issue submission: {e}")
+        client.chat_postMessage(
+            channel=GENERAL_CHANNEL_ID,
+            text=(
+                f":warning: Something went wrong processing your mission request. "
+                f"({e})"
+            ),
+        )

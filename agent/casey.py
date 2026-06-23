@@ -43,7 +43,10 @@ donors, NGOs, volunteers, and grants to address educational needs.
   (e.g., "Lucknow", "Prayagraj", "Banda", "Kanpur"), 
   or "National" if no specific city is mentioned.
 
-- Once coalition is computed and presented, call `mark_resolved`.
+- Once build_coalition returns results, you MUST include the COMPLETE \
+  coalition summary (donor, NGO partner, volunteers, grant support, \
+  and Coalition Score) verbatim in your response message BEFORE calling \
+  mark_resolved. Never summarize or shorten the coalition output.
 
 ## IMPORTANT
 Never pass a focus_area or skill value outside the lists above. 

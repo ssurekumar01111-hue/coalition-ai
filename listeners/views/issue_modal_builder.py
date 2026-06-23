@@ -1,46 +1,48 @@
-from listeners.views.app_home_builder import CATEGORIES
-
-
 def build_issue_modal(category: str) -> dict:
-    """Build the issue submission modal pre-filled with the selected category.
+    """Build the mission submission modal pre-filled with selected need type."""
 
-    Args:
-        category: The pre-selected category value from the button click.
-    """
-    category_options = [
-        {
-            "text": {"type": "plain_text", "text": cat["value"], "emoji": True},
-            "value": cat["value"],
-        }
-        for cat in CATEGORIES
-    ]
+    # Map category values to example placeholder text
+    placeholders = {
+        "We need laptops and devices for students": (
+            "e.g. We need 50 laptops for 200 students in Lucknow by August 2026"
+        ),
+        "We need books and reading materials for children": (
+            "e.g. We need books and reading materials for 300 children in Banda"
+        ),
+        "We need STEM workshop mentors for students": (
+            "e.g. We need STEM workshop mentors for 100 students in Kanpur"
+        ),
+        "We need mentors and tutors for underserved students": (
+            "e.g. We need 10 mentors for underserved students in Prayagraj"
+        ),
+        "We have an educational need to discuss": (
+            "e.g. Describe your educational need and location..."
+        ),
+    }
 
-    initial_option = next(
-        (opt for opt in category_options if opt["value"] == category),
-        category_options[0],
+    placeholder_text = placeholders.get(
+        category, "Describe your educational need..."
     )
 
     return {
         "type": "modal",
         "callback_id": "issue_submission",
-        "title": {"type": "plain_text", "text": "Submit an Issue"},
-        "submit": {"type": "plain_text", "text": "Submit"},
+        "title": {"type": "plain_text", "text": "🚀 Start a Mission"},
+        "submit": {"type": "plain_text", "text": "Launch Mission"},
         "close": {"type": "plain_text", "text": "Cancel"},
+        "private_metadata": category,
         "blocks": [
             {
-                "type": "input",
-                "block_id": "category_block",
-                "element": {
-                    "type": "static_select",
-                    "action_id": "category_select",
-                    "placeholder": {
-                        "type": "plain_text",
-                        "text": "Select a category",
-                    },
-                    "options": category_options,
-                    "initial_option": initial_option,
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": (
+                        f"*Need type:* {category}\n\n"
+                        "Describe your need in detail — Coalition AI will "
+                        "assemble donors, NGOs, volunteers, and grants "
+                        "around it."
+                    ),
                 },
-                "label": {"type": "plain_text", "text": "Category"},
             },
             {
                 "type": "input",
@@ -51,10 +53,23 @@ def build_issue_modal(category: str) -> dict:
                     "multiline": True,
                     "placeholder": {
                         "type": "plain_text",
-                        "text": "Describe your issue in detail...",
+                        "text": placeholder_text,
                     },
                 },
-                "label": {"type": "plain_text", "text": "Description"},
+                "label": {"type": "plain_text", "text": "Describe your need"},
+            },
+            {
+                "type": "input",
+                "block_id": "location_block",
+                "element": {
+                    "type": "plain_text_input",
+                    "action_id": "location_input",
+                    "placeholder": {
+                        "type": "plain_text",
+                        "text": "e.g. Lucknow, Banda, Kanpur, Prayagraj",
+                    },
+                },
+                "label": {"type": "plain_text", "text": "Location"},
             },
         ],
     }
