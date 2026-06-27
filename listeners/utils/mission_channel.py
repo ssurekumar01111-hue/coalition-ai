@@ -78,7 +78,7 @@ def create_mission_channel(client, coalition_result: str,
             canvas_content = _build_canvas_content(
                 resource_type, location, coalition_result
             )
-            client.canvases_create(
+            client.conversations_canvases_create(
                 channel_id=channel_id,
                 document_content={
                     "type": "markdown",
