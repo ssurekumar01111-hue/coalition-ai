@@ -101,7 +101,10 @@ SLACK_MCP_URL = "https://mcp.slack.com/mcp"
 # Resolve absolute path to coalition_mcp_server.py relative to the directory of this file
 server_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "coalition_mcp_server.py"))
 
-coalition_toolset = MCPToolset(str(server_path))
+coalition_toolset = MCPToolset(
+    str(server_path),
+    init_timeout=30.0,
+)
 
 coalition_agent = Agent(
     deps_type=CaseyDeps,
@@ -115,6 +118,8 @@ coalition_agent = Agent(
 
 def run_coalition_agent(text, deps, message_history=None):
     """Run the Coalition agent, optionally connecting to the Slack MCP server and the local Coalition toolset."""
+    import os
+    os.environ["PYTHONUNBUFFERED"] = "1"
     toolsets = [coalition_toolset]
     if deps.user_token:
         logger.info("Slack MCP Server enabled (user_token present)")

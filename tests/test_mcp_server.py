@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import patch
 from coalition_mcp_server import (
     find_donors,
     find_ngos,
@@ -8,6 +9,11 @@ from coalition_mcp_server import (
 )
 
 class TestMcpServerTools:
+    @pytest.fixture(autouse=True)
+    def mock_generate_ai_grants(self):
+        with patch("coalition_mcp_server.generate_ai_grants", return_value=[]):
+            yield
+
     def test_find_donors(self):
         result = find_donors("laptops", "Lucknow")
         assert "Lucknow Tech Foundation" in result

@@ -1,3 +1,6 @@
+import os
+from google import genai
+from google.genai import types
 from mcp.server.fastmcp import FastMCP
 from datetime import datetime
 from agent.tools._data import (
@@ -7,6 +10,10 @@ from agent.tools._data import (
     get_grants,
     get_proximity_score,
 )
+import sys
+import logging
+# Redirect all logging to stderr so stdout stays clean for MCP protocol
+logging.basicConfig(stream=sys.stderr, level=logging.WARNING)
 
 mcp = FastMCP("coalition-ai-tools")
 
@@ -25,6 +32,50 @@ def get_deadline_urgency_score(deadline_str: str) -> int:
             return 100
     except Exception:
         return 70
+
+def generate_ai_grants(focus_area: str, location: str) -> list:
+    """Use Gemini to generate contextually relevant Indian government 
+    education scheme suggestions when seeded data is insufficient."""
+    try:
+        client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY", ""))
+        
+        prompt = f"""You are an expert on Indian government education schemes and grants.
+
+Generate 2 real or realistic Indian government education funding schemes 
+or grants relevant for:
+- Focus area: {focus_area}
+- Location: {location}, Uttar Pradesh, India
+
+Return ONLY a JSON array with exactly 2 objects, each with these fields:
+- name: string (official or realistic scheme name)
+- focus_area: string (must be exactly "{focus_area}")
+- location_scope: string (either "{location}" or "Uttar Pradesh" or "National")
+- deadline: string (future date YYYY-MM-DD within 6 months from 2026-06-25)
+- amount_range: string (e.g. "50000-200000")
+- source: string (ministry or department name)
+
+Base on real schemes: PM eVidya, Samagra Shiksha, NMMS, AICTE schemes, 
+UP government education initiatives, etc.
+Return ONLY the JSON array, no other text, no markdown fences."""
+
+        response = client.models.generate_content(
+            model="gemini-2.5-flash-lite",
+            contents=prompt
+        )
+        
+        import json
+        text = response.text.strip()
+        if text.startswith("```"):
+            text = text.split("```")[1]
+            if text.startswith("json"):
+                text = text[4:]
+        text = text.strip()
+        
+        schemes = json.loads(text)
+        return schemes if isinstance(schemes, list) else []
+    except Exception:
+        return []
+
 
 @mcp.tool()
 def find_donors(resource_type: str, location: str = None) -> str:
@@ -102,24 +153,55 @@ def find_volunteers(skill: str, location: str = None) -> str:
 
 @mcp.tool()
 def find_grants(focus_area: str, location: str = None) -> str:
-    """Find grants matching a specific focus area and location scope.
-
-    Use this tool to find funding grants with a matching focus area that cover either the
-    specified location or are national in scope. Results are sorted by the soonest deadline.
+    """Find grants and government schemes matching a focus area and location.
+    
+    Uses curated local grant data enhanced with AI-powered discovery of 
+    relevant Indian government education schemes via Gemini.
 
     Args:
-        focus_area: The focus area of the grant (e.g., 'education', 'technology', 'literacy').
+        focus_area: The focus area of the grant (e.g., 'education', 
+                    'technology', 'literacy').
         location: Optional location of the need (e.g., 'Lucknow').
     """
-    grants = get_grants(focus_area, location)
-    if not grants:
+    # Get seeded grants first
+    seeded_grants = get_grants(focus_area, location)
+    
+    # If we have 2+ seeded matches, use them directly
+    if len(seeded_grants) >= 2:
+        matches = seeded_grants[:3]
+        lines = [f"Found {len(seeded_grants)} grant(s) for '{focus_area}':"]
+        for g in matches:
+            lines.append(
+                f"- **{g['name']}** | Scope: {g['location_scope']} "
+                f"| Deadline: {g['deadline']}"
+            )
+        return "\n".join(lines)
+    
+    # Otherwise enhance with AI-generated schemes
+    ai_grants = generate_ai_grants(focus_area, location or "Uttar Pradesh")
+    
+    all_grants = seeded_grants.copy()
+    for ag in ai_grants:
+        ag["_ai_generated"] = True
+        all_grants.append(ag)
+    
+    if not all_grants:
         return f"No grants found for focus area '{focus_area}'."
     
-    matches = grants[:3]
-    lines = [f"Found {len(grants)} grant(s) for focus area '{focus_area}':"]
-    for g in matches:
+    lines = [f"Found {len(all_grants)} grant(s) for '{focus_area}' "
+             f"(including AI-discovered government schemes):"]
+    for g in all_grants[:3]:
+        source_tag = " 🤖" if g.get("_ai_generated") else ""
+        scope = g.get("location_scope", "N/A")
+        deadline = g.get("deadline", "N/A")
         lines.append(
-            f"- **{g['name']}** | Scope: {g['location_scope']} | Deadline: {g['deadline']}"
+            f"- **{g['name']}**{source_tag} | Scope: {scope} "
+            f"| Deadline: {deadline}"
+        )
+    if any(g.get("_ai_generated") for g in all_grants[:3]):
+        lines.append(
+            "_🤖 AI-discovered schemes based on Indian government "
+            "education programs_"
         )
     return "\n".join(lines)
 
@@ -149,6 +231,9 @@ def build_coalition(resource_type: str, focus_area: str, location: str) -> str:
         
     volunteers = get_volunteers(skill, location)
     grants = get_grants(focus_area, location)
+    if not grants:
+        ai_grants = generate_ai_grants(focus_area, location)
+        grants = ai_grants  # use AI grants as fallback
 
     selected_donor = donors[0] if donors else None
     selected_ngo = ngos[0] if ngos else None
