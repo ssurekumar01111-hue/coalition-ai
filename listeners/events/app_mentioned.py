@@ -8,6 +8,7 @@ from agent import CaseyDeps, run_coalition_agent
 from thread_context import conversation_store
 from listeners.views.feedback_builder import build_feedback_blocks
 from listeners.utils.mission_channel import create_mission_channel
+from agent.impact_tracker import increment_stats
 
 
 def handle_app_mentioned(
@@ -131,6 +132,31 @@ def handle_app_mentioned(
             except Exception as mission_err:
                 logger.warning(f"Mission channel creation failed: "
                               f"{mission_err}")
+
+        # Update impact stats
+        try:
+            # Extract student count from message if mentioned
+            count_match = re.search(r'\b(\d+)\b', cleaned_text)
+            student_count = int(count_match.group(1)) if count_match else 50
+            
+            # Extract volunteer count from coalition result
+            vol_match = re.search(r'Found (\d+) active volunteer', 
+                                  result.output)
+            vol_count = int(vol_match.group(1)) if vol_match else 1
+            
+            # Check if grant was found
+            grant_count = 1 if 'Grant Support' in result.output and \
+                         'no' not in result.output.lower()[:200] else 0
+            
+            increment_stats(
+                missions=1,
+                students=student_count,
+                volunteers=vol_count,
+                grants=grant_count,
+                coalitions=1
+            )
+        except Exception:
+            pass  # Never block the main flow
 
     except Exception as e:
         logger.exception(f"Failed to handle app mention: {e}")

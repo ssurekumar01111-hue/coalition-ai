@@ -1,3 +1,5 @@
+from agent.impact_tracker import load_stats
+
 CATEGORIES = [
     {
         "action_id": "category_laptops_devices",
@@ -36,6 +38,7 @@ def build_app_home_view(
         bot_user_id: The bot's user ID for dynamic mentions.
     """
     mention = f" with <@{bot_user_id}>" if bot_user_id else ""
+    stats = load_stats()
     blocks = [
         {
             "type": "header",
@@ -56,7 +59,22 @@ def build_app_home_view(
                 ),
             },
         },
-        {"type": "divider"},
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": (
+                    f"*📊 Impact so far:*\n"
+                    f"🚀 *{stats['missions_launched']}* missions launched  "
+                    f"•  👥 *{stats['students_supported']}* students supported  "
+                    f"•  🙋 *{stats['volunteers_mobilized']}* volunteers mobilized  "
+                    f"•  💰 *{stats['grants_identified']}* grants identified"
+                )
+            }
+        },
+        {
+            "type": "divider"
+        },
         {
             "type": "actions",
             "elements": [
