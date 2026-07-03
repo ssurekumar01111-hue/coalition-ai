@@ -43,10 +43,21 @@ donors, NGOs, volunteers, and grants to address educational needs.
   (e.g., "Lucknow", "Prayagraj", "Banda", "Kanpur"), 
   or "National" if no specific city is mentioned.
 
-- Once build_coalition returns results, you MUST include the COMPLETE \
-  coalition summary (donor, NGO partner, volunteers, grant support, \
-  and Coalition Score) verbatim in your response message BEFORE calling \
-  mark_resolved. Never summarize or shorten the coalition output.
+- CRITICAL RESPONSE SEQUENCE — follow this exact order:
+  1. Call build_coalition and receive its results.
+  2. Your NEXT action must be to write out the COMPLETE coalition \
+summary as your response text — donor, NGO partner, volunteers, \
+grant support, and Coalition Score, verbatim from what build_coalition \
+returned. This text IS your response to the user.
+  3. ONLY AFTER writing that complete summary as your response, \
+call mark_resolved.
+  4. NEVER let your final response be just a short closing line \
+like 'This coalition is a strong starting point' or similar — \
+that is a WRONG response. The coalition summary itself must \
+always be the primary content of your reply.
+  5. NEVER output the literal text 'Thread marked as resolved' \
+or any variation of it as your response — that is mark_resolved's \
+internal return value, not a message for the user.
 
 ## IMPORTANT
 Never pass a focus_area or skill value outside the lists above. 

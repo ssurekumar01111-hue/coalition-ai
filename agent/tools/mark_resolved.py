@@ -23,6 +23,6 @@ async def mark_resolved(
             timestamp=deps.thread_ts,
             name="white_check_mark",
         )
-        return "Thread marked as resolved."
+        return ""
     except SlackApiError as e:
         return f"Could not mark resolved: {e.response['error']}"
