@@ -63,14 +63,27 @@ def get_volunteers(skill: str, location: str = None):
 
 def get_grants(focus_area: str, location: str = None):
     grants = load_json("grants.json")
-    matched = []
-    for g in grants:
-        if g.get("focus_area", "").lower() == focus_area.lower():
+
+    def _match(target_focus_area):
+        matched = []
+        for g in grants:
+            if g.get("focus_area", "").lower() != target_focus_area.lower():
+                continue
             if location:
                 scope = g.get("location_scope", "")
-                if scope.lower() in [location.lower(), "national"]:
-                    matched.append(g)
-            else:
-                matched.append(g)
-    matched.sort(key=lambda g: g.get("deadline", "9999-12-31"))
-    return matched
+                if scope.lower() not in [location.lower(), "national"]:
+                    continue
+            matched.append(g)
+        matched.sort(key=lambda g: g.get("deadline", "9999-12-31"))
+        return matched
+
+    # Try exact match first
+    results = _match(focus_area)
+
+    # Fallback: if no exact match and focus_area isn't already
+    # "education", retry with "education" as a general catch-all
+    # (every grant in this domain ultimately funds education)
+    if not results and focus_area.lower() != "education":
+        results = _match("education")
+
+    return results
