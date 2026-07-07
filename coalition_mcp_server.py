@@ -1,4 +1,5 @@
 import os
+import pathlib
 from google import genai
 from google.genai import types
 from mcp.server.fastmcp import FastMCP
@@ -311,4 +312,11 @@ def build_coalition(resource_type: str, focus_area: str, location: str) -> str:
     return "\n".join(lines)
 
 if __name__ == "__main__":
+    # DEBUG: surface data directory resolution into Railway logs via stderr.
+    # Remove once the data-file path issue is confirmed resolved.
+    import sys as _sys
+    _data_dir = pathlib.Path(os.path.abspath(os.path.join(os.path.dirname(__file__), "data")))
+    print(f"DEBUG: DATA_DIR resolved to: {_data_dir}", file=_sys.stderr, flush=True)
+    print(f"DEBUG: DATA_DIR exists: {_data_dir.exists()}", file=_sys.stderr, flush=True)
+    print(f"DEBUG: Files in DATA_DIR: {list(_data_dir.glob('*.json')) if _data_dir.exists() else 'N/A'}", file=_sys.stderr, flush=True)
     mcp.run()
