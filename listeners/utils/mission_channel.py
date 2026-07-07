@@ -71,11 +71,15 @@ def create_mission_channel(client, coalition_result: str,
             channel_id = e.response.get("channel", {}).get("id")
             if not channel_id:
                 # Fallback: search the first page of public channels.
-                list_resp = client.conversations_list(
-                    types="public_channel",
-                    exclude_archived=False,
-                    limit=1000,
-                )
+                # Enterprise Grid workspaces require team_id in conversations.list calls.
+                list_kwargs = {
+                    "types": "public_channel",
+                    "exclude_archived": False,
+                    "limit": 1000,
+                }
+                if team_id:
+                    list_kwargs["team_id"] = team_id
+                list_resp = client.conversations_list(**list_kwargs)
                 matched = [
                     c for c in list_resp.get("channels", [])
                     if c["name"] == channel_name

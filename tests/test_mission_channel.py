@@ -149,6 +149,7 @@ class TestNameTakenFallbackToList:
             types="public_channel",
             exclude_archived=False,
             limit=1000,
+            team_id="T123",
         )
 
     def test_posts_message_when_id_found_via_list(self):
