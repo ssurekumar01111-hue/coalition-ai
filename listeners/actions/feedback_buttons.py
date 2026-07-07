@@ -28,7 +28,7 @@ def handle_feedback_button(
                 channel=channel_id,
                 user=user_id,
                 thread_ts=message_ts,
-                text="Sorry that wasn't helpful. :slightly_frowning_face: Try rephrasing your question or I can create a support ticket for you.",
+                text="Sorry that wasn't helpful. :slightly_frowning_face: Try rephrasing your request or providing more details.",
             )
 
         logger.debug(

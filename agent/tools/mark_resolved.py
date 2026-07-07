@@ -9,8 +9,8 @@ async def mark_resolved(
 ) -> str:
     """Mark the user's issue as resolved by adding a green check mark reaction to the parent thread message.
 
-    Call this once when the issue is fully resolved — e.g. password reset
-    complete, ticket created, problem fixed.
+    Call this once when the issue is fully resolved — e.g. coalition recommendation
+    generated, coalition formed, problem resolved.
 
     Args:
         ctx: The run context with dependencies.

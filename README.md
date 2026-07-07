@@ -1,31 +1,52 @@
-# Groundswell: AI Coalition Agent (Bolt for Python and Pydantic)
+# Groundswell: AI Coalition Agent (Bolt for Python and Pydantic AI)
 
 Meet Groundswell — an AI-powered coalition agent that lives in Slack. Groundswell autonomously assembles donors, NGOs, volunteers, and grants around educational needs, forming mission-driven coalitions in minutes, all without leaving the conversation.
 
-Built with [Bolt for Python](https://docs.slack.dev/tools/bolt-python/) and [Pydantic AI](https://ai.pydantic.dev/) using models from [Anthropic](https://anthropic.com), [Google](https://ai.google.dev/), or [OpenAI](https://openai.com).
+Built with [Bolt for Python](https://docs.slack.dev/tools/bolt-python/) and [Pydantic AI](https://ai.pydantic.dev/) using models from [Google](https://ai.google.dev/), [Anthropic](https://anthropic.com), or [OpenAI](https://openai.com).
 
 ## App Overview
 
 Groundswell gives your team four ways to launch educational missions:
 
-* **App Home** — Users open Groundswell's Home tab and choose from need categories (Laptops & Devices, Books & Literacy, STEM Workshops, Mentorship, Other). A modal collects details, then Groundswell posts a coalition summary in a dedicated mission channel.
+* **App Home** — Users open Groundswell's Home tab, view live impact statistics, and choose from need categories (Laptops & Devices, Books & Literacy, STEM Workshops, Mentorship, Other). A modal collects details, then Groundswell posts a coalition summary in a dedicated mission channel.
 * **Direct Messages** — Users message Groundswell directly to describe an educational need. Groundswell responds in-thread, maintaining context across follow-ups.
 * **Channel @mentions** — Users mention `@Groundswell` in any channel to describe a need and receive a coalition in-thread.
 * **Assistant Panel** — Users click _Add Agent_ in Slack, select Groundswell, and pick from suggested prompts or describe a need.
 
-Groundswell uses the Coalition MCP Server to assemble resources in real time:
+Groundswell connects to the standalone **Coalition MCP Server** to assemble resources in real time:
 
-* **Donor Search** — Finds matching donors for the resource type and location.
-* **NGO Partner Search** — Identifies NGO partners aligned with the mission focus area.
-* **Volunteer Search** — Surfaces active volunteers with the required skills.
-* **Grant Search** — Locates available grants by focus area and location.
-* **Build Coalition** — Assembles all of the above into a scored, actionable coalition summary.
+* **Donor Search (`find_donors`)** — Finds matching donors for the resource type and location.
+* **NGO Partner Search (`find_ngos`)** — Identifies NGO partners aligned with the mission focus area.
+* **Volunteer Search (`find_volunteers`)** — Surfaces active volunteers with the required skills.
+* **Grant Search (`find_grants`)** — Locates available grants by focus area and location.
+* **Build Coalition (`build_coalition`)** — Assembles all of the above into a scored, actionable coalition summary.
 
-> **Note:** All MCP tools query a local data layer. In production, these would connect to your live donor/NGO/grant databases.
+> **Note:** All MCP tools query a local JSON data layer. In production, these would connect to your live database APIs.
 
-### Slack MCP Server
+---
 
-Groundswell also works with the [Slack MCP Server](https://docs.slack.dev/ai/slack-mcp-server), giving it the ability to search messages and files, read channel history and threads, send messages, schedule messages, and create or update Slack canvases. When deployed with OAuth (HTTP mode), Groundswell automatically connects to the Slack MCP Server using the user's token, unlocking these capabilities on top of the built-in coalition tools.
+## Key Features
+
+### 1. Standalone Coalition MCP Server
+The coalition search tools are implemented in `coalition_mcp_server.py` as a standalone Model Context Protocol (MCP) server. Groundswell spawns this server dynamically as a background subprocess using Pydantic AI's `MCPToolset` over stdio transport. This decouples the AI domain logic from the core message routing application.
+
+### 2. Real-Time Blocker Detection
+If a user posts about a blocker in an active thread (e.g. volunteer shortage, funding gap, grant needs), Groundswell's blocker detector (`listeners/blocker_detector.py`) intercepts the message. Groundswell then uses targeted MCP tools (like `find_volunteers` or `find_donors`) to suggest solutions in-thread, without re-running the entire coalition algorithm.
+
+### 3. Mission Channels & Canvas
+When a new coalition is recommended, Groundswell automatically creates (or reuses) a dedicated public Slack channel (e.g. `#mission-laptops-kanpur`). It posts the coalition summary and initializes a rich **Slack Canvas** containing:
+- Mission Overview & launch date.
+- Verification status for NGOs and capacity details for donors.
+- A progress tracking table with next steps.
+
+### 4. App Home Impact Tracker
+The App Home tab acts as a live dashboard (`agent/impact_tracker.py`), displaying:
+- Total coalitions created.
+- Total active volunteers in the system.
+- Aggregated donor capacity (units of resources).
+- Active government and private grants discovered.
+
+---
 
 ## Setup
 
@@ -33,310 +54,147 @@ Before getting started, make sure you have a development workspace where you hav
 
 ### Developer Program
 
-Join the [Slack Developer Program](https://api.slack.com/developer-program) for exclusive access to sandbox environments for building and testing your apps, tooling, and resources created to help you build and grow.
+Join the [Slack Developer Program](https://api.slack.com/developer-program) for exclusive access to sandbox environments for building and testing your apps.
 
-### Create the Slack app
+### Create the Slack App
 
-<details><summary><strong>Using Slack CLI</strong></summary>
+1. Open [https://api.slack.com/apps/new](https://api.slack.com/apps/new) and choose "From an app manifest".
+2. Choose the workspace you want to install the application to.
+3. Copy the contents of [manifest.json](./manifest.json) into the text box that says `*Paste your manifest code here*` (within the JSON tab) and click _Next_.
+4. Review the configuration and click _Create_.
+5. Click _Install to Workspace_ and _Allow_.
 
-Install the latest version of the Slack CLI for your operating system:
-
-- [Slack CLI for macOS & Linux](https://docs.slack.dev/tools/slack-cli/guides/installing-the-slack-cli-for-mac-and-linux/)
-- [Slack CLI for Windows](https://docs.slack.dev/tools/slack-cli/guides/installing-the-slack-cli-for-windows/)
-
-You'll also need to log in if this is your first time using the Slack CLI.
-
-```sh
-slack login
-```
-
-#### Initializing the project
-
-```sh
-slack create my-casey-agent --template slack-samples/bolt-python-support-agent --subdir pydantic-ai
-cd my-casey-agent
-```
-
-</details>
-
-<details><summary><strong>Using App Settings</strong></summary>
-
-#### Create Your Slack App
-
-1. Open [https://api.slack.com/apps/new](https://api.slack.com/apps/new) and choose "From an app manifest"
-2. Choose the workspace you want to install the application to
-3. Copy the contents of [manifest.json](./manifest.json) into the text box that says `*Paste your manifest code here*` (within the JSON tab) and click _Next_
-4. Review the configuration and click _Create_
-5. Click _Install to Workspace_ and _Allow_ on the screen that follows. You'll then be redirected to the App Configuration dashboard.
-
-#### Environment Variables
-
-Before you can run the app, you'll need to store some environment variables.
+### Environment Variables
 
 1. Rename `.env.sample` to `.env`.
-2. Open your apps setting page from [this list](https://api.slack.com/apps), click _OAuth & Permissions_ in the left hand menu, then copy the _Bot User OAuth Token_ into your `.env` file under `SLACK_BOT_TOKEN`.
+2. Open your apps setting page from [api.slack.com/apps](https://api.slack.com/apps), click _OAuth & Permissions_, then copy the _Bot User OAuth Token_ into `.env` under `SLACK_BOT_TOKEN`.
+3. Click _Basic Information_ and follow the steps in the _App-Level Tokens_ section to create an app-level token with the `connections:write` scope. Copy that token into `.env` as `SLACK_APP_TOKEN`.
 
 ```sh
-SLACK_BOT_TOKEN=YOUR_SLACK_BOT_TOKEN
+SLACK_BOT_TOKEN=xoxb-YOUR_BOT_TOKEN
+SLACK_APP_TOKEN=xapp-YOUR_APP_TOKEN
 ```
 
-3. Click _Basic Information_ from the left hand menu and follow the steps in the _App-Level Tokens_ section to create an app-level token with the `connections:write` scope. Copy that token into your `.env` as `SLACK_APP_TOKEN`.
-
-```sh
-SLACK_APP_TOKEN=YOUR_SLACK_APP_TOKEN
-```
-
-#### Initializing the project
-
-```sh
-git clone https://github.com/slack-samples/bolt-python-support-agent.git my-casey-agent
-cd my-casey-agent
-```
-
-</details>
-
-### Setup your python virtual environment
+### Python Virtual Environment
 
 ```sh
 python3 -m venv .venv
-source .venv/bin/activate  # for Windows OS, .\.venv\Scripts\Activate instead should work
-```
-
-#### Install dependencies
-
-```sh
+source .venv/bin/activate  # on Windows use: .\.venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+---
+
 ## Providers
 
-This app supports both Anthropic and OpenAI as AI providers. Set at least one API key — if both are set, Anthropic is used by default.
+Groundswell supports Google Gemini, Anthropic Claude, and OpenAI GPT as AI providers. Set at least one API key — Groundswell checks and prioritizes them in the following order:
+
+1. **Google Gemini** (Default: `google:gemini-2.5-flash`)
+2. **Anthropic Claude** (Default: `anthropic:claude-3-5-sonnet-latest`)
+3. **OpenAI GPT** (Default: `openai:gpt-4o-mini`)
+
+### Google Gemini Setup (Recommended)
+1. Generate an API key from the [Google AI Studio Dashboard](https://aistudio.google.com/apikey).
+2. Save it to `.env`:
+   ```sh
+   GOOGLE_API_KEY=YOUR_GOOGLE_API_KEY
+   ```
 
 ### Anthropic Setup
-
-Uses Anthropic's `claude-sonnet-4-6` model through Pydantic AI.
-
-1. Create an API key from your [Anthropic dashboard](https://console.anthropic.com/settings/keys).
-1. Rename `.env.sample` to `.env`.
-3. Save the Anthropic API key to `.env`:
-
-```sh
-ANTHROPIC_API_KEY=YOUR_ANTHROPIC_API_KEY
-```
+1. Create an API key from your [Anthropic Console](https://console.anthropic.com/settings/keys).
+2. Save it to `.env`:
+   ```sh
+   ANTHROPIC_API_KEY=YOUR_ANTHROPIC_API_KEY
+   ```
 
 ### OpenAI Setup
+1. Create an API key from your [OpenAI Dashboard](https://platform.openai.com/api-keys).
+2. Save it to `.env`:
+   ```sh
+   OPENAI_API_KEY=YOUR_OPENAI_API_KEY
+   ```
 
-Uses OpenAI's `gpt-4.1-mini` model through Pydantic AI.
-
-1. Create an API key from your [OpenAI dashboard](https://platform.openai.com/api-keys).
-1. Rename `.env.sample` to `.env`.
-3. Save the OpenAI API key to `.env`:
-
-```sh
-OPENAI_API_KEY=YOUR_OPENAI_API_KEY
-```
+---
 
 ## Development
 
-### Starting the app
+### Starting the App Locally
 
-<details><summary><strong>Using the Slack CLI</strong></summary>
-
-#### Slack CLI
-
-```sh
-slack run
-```
-</details>
-
-<details><summary><strong>Using the Terminal</strong></summary>
-
-#### Terminal
-
+To start the Slack app in Socket Mode:
 ```sh
 python3 app.py
 ```
 
-</details>
+### Run Tests
 
-<details><summary><strong>Using OAuth HTTP Server (with ngrok)</strong></summary>
-
-#### OAuth HTTP Server
-
-This mode uses an HTTP server instead of Socket Mode, which is required for OAuth-based distribution.
-
-1. Install [ngrok](https://ngrok.com/download) and start a tunnel:
-
+Run the test suite using pytest:
 ```sh
-ngrok http 3000
+pytest --tb=short -q
 ```
 
-2. Copy the `https://*.ngrok-free.app` URL from the ngrok output.
-
-<details><summary><strong>Using Slack CLI</strong></summary>
-
-#### Slack CLI
-
-3. Update `manifest.json` for HTTP mode:
-   - Set `socket_mode_enabled` to `false`
-   - Replace `ngrok-free.app` with your ngrok domain (e.g. `YOUR_NGROK_SUBDOMAIN.ngrok-free.app`)
-
-4. Create a new local dev app:
+### Linting & Formatting
 
 ```sh
-slack install -E local
-```
-
-5. _(Slack CLI < v4.1.0 only)_ Enable MCP for your app:
-   - Run `slack app settings` to open your app's settings
-   - Navigate to **Agents & AI Apps** in the left-side navigation
-   - Toggle **Model Context Protocol** on
-
-6. Update your `.env` OAuth environment variables:
-   - Run `slack app settings` to open App Settings
-   - Copy **Client ID**, **Client Secret**, and **Signing Secret**
-   - Update `SLACK_REDIRECT_URI` in `.env` with your ngrok domain
-
-```sh
-SLACK_CLIENT_ID=YOUR_CLIENT_ID
-SLACK_CLIENT_SECRET=YOUR_CLIENT_SECRET
-SLACK_SIGNING_SECRET=YOUR_SIGNING_SECRET
-SLACK_REDIRECT_URI=https://YOUR_NGROK_SUBDOMAIN.ngrok-free.app/slack/oauth_redirect
-```
-
-7. Start the app:
-
-```sh
-slack run app_oauth.py
-```
-
-8. Click the install URL printed in the terminal to install the app to your workspace via OAuth.
-
-</details>
-
-<details><summary><strong>Using the Terminal</strong></summary>
-
-#### Terminal
-
-3. Create your Slack app at [api.slack.com/apps/new](https://api.slack.com/apps/new) using [`manifest.json`](./manifest.json). Before pasting the manifest, set `socket_mode_enabled` to `false` and replace `ngrok-free.app` with your ngrok domain.
-
-4. Install the app to your workspace and copy the following values into your `.env`:
-   - **Signing Secret** — from _Basic Information_
-   - **Bot User OAuth Token** — from _OAuth & Permissions_
-   - **Client ID** and **Client Secret** — from _Basic Information_
-
-```sh
-SLACK_BOT_TOKEN=xoxb-YOUR_BOT_TOKEN
-SLACK_CLIENT_ID=YOUR_CLIENT_ID
-SLACK_CLIENT_SECRET=YOUR_CLIENT_SECRET
-SLACK_SIGNING_SECRET=YOUR_SIGNING_SECRET
-SLACK_REDIRECT_URI=https://YOUR_NGROK_SUBDOMAIN.ngrok-free.app/slack/oauth_redirect
-```
-
-Replace `your-subdomain` in `SLACK_REDIRECT_URI` with your ngrok subdomain.
-
-5. Start the app:
-
-```sh
-python3 app_oauth.py
-```
-
-6. Click the install URL printed in the terminal to install the app to your workspace via OAuth.
-
-</details>
-
-> **Note:** Each time ngrok restarts, it generates a new URL. You'll need to update the ngrok domain in `manifest.json`, `SLACK_REDIRECT_URI` in your `.env`, and re-install the app.
-
-</details>
-
-### Using the App
-
-Once Groundswell is running, there are several ways to interact:
-
-**App Home** — Open Groundswell in Slack and click the _Home_ tab. You'll see need-category buttons. Click one to open a modal, describe your educational need, and submit. Groundswell will build a coalition and post the results to a dedicated mission channel.
-
-**Direct Messages** — Open a DM with Groundswell and describe an educational need. Groundswell will react with :eyes: while processing, then reply in a thread with a full coalition summary. Send follow-up messages in the same thread and Groundswell will maintain the full conversation context.
-
-**Channel @mentions** — Invite Groundswell to a channel by typing `/invite @Groundswell` in the message box, then type `@Groundswell` followed by your need. Groundswell responds in a thread so the channel stays clean and automatically creates a mission channel for coordination.
-
-**Assistant Panel** — Click _Add Agent_ in the top-right corner of Slack, select Groundswell from the list, then pick a suggested prompt or type a message.
-
-Groundswell will add a :white_check_mark: reaction when it believes a mission has been resolved, and reacts with a contextual emoji to every message to keep things friendly.
-
-### Linting
-
-```sh
-# Run ruff check from root directory for linting
 ruff check
-
-# Run ruff format from root directory for code formatting
 ruff format
 ```
 
+---
+
+## Deployment
+
+Groundswell is ready for 24/7 cloud deployment. In production (such as on **Railway**), the app runs as a standalone long-running container using Bolt's WebSocket-based Socket Mode.
+
+- **Dockerfile**: Builds a minimal Python container (`python:3.13-slim`), copies the application files, sets up `PYTHONPATH=/app` to ensure local packages resolve correctly, and executes `CMD ["python", "app.py"]`.
+- **railway.json**: Configures the Railway environment, ensuring automated process restarts on failure.
+- **Environment Config**: Requires `SLACK_BOT_TOKEN`, `SLACK_APP_TOKEN`, and `GOOGLE_API_KEY` (or other provider keys) to be set in the production dashboard variables. No public HTTP endpoints or ngrok tunnels are required.
+
+To deploy manually via the Railway CLI:
+```sh
+railway link -p <project-id> -s groundswell
+railway up
+```
+
+---
+
 ## Project Structure
 
-### `manifest.json`
-
-`manifest.json` is a configuration for Slack apps. With a manifest, you can create an app with a pre-defined configuration, or adjust the configuration of an existing app.
-
-### `app.py`
-
-`app.py` is the entry point for the application and is the file you'll run to start the server. This project aims to keep this file as thin as possible, primarily using it as a way to route inbound requests.
-
-### `app_oauth.py`
-
-`app_oauth.py` is an alternative entry point that runs the app in HTTP mode instead of Socket Mode. This is intended for deployments that use OAuth for app distribution. See the HTTP Mode section under Development for setup instructions.
-
-### `manifest_oauth.json`
-
-`manifest_oauth.json` is the app manifest configured for HTTP mode (Socket Mode disabled, with request URLs for event subscriptions and interactivity). Use this when setting up the app for HTTP mode instead of `manifest.json`.
+### Root Configs
+- `manifest.json` — The Slack app manifest for Socket Mode.
+- `app.py` — Main entry point for the Socket Mode application.
+- `coalition_mcp_server.py` — The standalone FastMCP server containing the resource lookup tools.
 
 ### `/listeners`
+Every incoming Slack event, action, or view submission is routed to a corresponding listener under this directory:
 
-Every incoming request is routed to a "listener". This directory groups each listener based on the Slack Platform feature used.
-
-**`/listeners/events`** — Handles incoming events:
-
-- `app_home_opened.py` — Publishes the App Home view with category buttons.
-- `app_mentioned.py` — Responds to `@Groundswell` mentions in channels.
-- `message.py` — Responds to direct messages from users.
-
-**`/listeners/actions`** — Handles interactive components:
-
-- `category_buttons.py` — Opens the issue submission modal when a category button is clicked.
-- `feedback.py` — Handles thumbs up/down feedback on Groundswell's responses.
-
-**`/listeners/views`** — Handles view submissions and builds Block Kit views:
-
-- `issue_modal.py` — Processes modal submissions, starts a DM thread, and runs the agent.
-- `app_home_builder.py` — Constructs the App Home Block Kit view.
-- `modal_builder.py` — Constructs the issue submission modal.
-- `feedback_block.py` — Creates the feedback button block attached to responses.
+- **`/listeners/events`** — Slack Events API subscriptions:
+  - `app_home_opened.py` — Triggers when a user visits the App Home tab, rendering live impact stats.
+  - `app_mentioned.py` — Handles channel `@Groundswell` mentions.
+  - `message.py` — Handles direct messages to the bot.
+  - `assistant_thread_started.py` — Receives assistant agent launch events.
+- **`/listeners/actions`** — Interactive Block Kit actions:
+  - `issue_buttons.py` — Launches the need submission modal from App Home.
+  - `feedback_buttons.py` — Handles thumbs up/down clicks.
+- **`/listeners/views`** — View/Modal submissions:
+  - `issue_modal.py` — Processes the submitted need modal and invokes the agent.
+- **`/listeners/views` builders**:
+  - `app_home_builder.py` — Compiles the App Home tab structure.
+  - `issue_modal_builder.py` — Compiles the submission modal.
+  - `feedback_builder.py` — Attaches feedback elements to agent responses.
+- **`/listeners/utils`**:
+  - `mission_channel.py` — Handles creation of channels (e.g. `#mission-laptops-lucknow`) and Canvas setup.
+- **`listeners/blocker_detector.py`** — Intercepts chat messages in threads to detect blocker keywords.
 
 ### `/agent`
+- `casey.py` — Initializes the Pydantic AI `Agent` with system instructions, safety config, model selection, and Slack utility tools (`add_emoji_reaction`, `mark_resolved`).
+- `deps.py` — Defines `CaseyDeps` containing the Slack WebClient, channel, and message identifiers.
+- `impact_tracker.py` — Queries the local JSON database to compute live metrics for App Home.
+- **`/agent/tools`**:
+  - `emoji_reaction.py` — Reacts to messages.
+  - `mark_resolved.py` — Appends a checkmark reaction to threads.
 
-The `casey.py` file defines the Pydantic AI Agent with a system prompt, personality, and tool configuration.
-
-The `deps.py` file defines the `CaseyDeps` dataclass passed to the agent at runtime, providing access to the Slack client and conversation context.
-
-The `tools` directory contains five IT support tools that the agent can call during a conversation.
+### `/data`
+Contains local JSON database files (`donors.json`, `ngos.json`, `volunteers.json`, `grants.json`) representing the resource database.
 
 ### `/thread_context`
-
-The `store.py` file implements a thread-safe in-memory conversation history store, keyed by channel and thread. This enables multi-turn conversations where Groundswell remembers previous context within a thread.
-
-## Troubleshooting
-
-### MCP Server connection error: `HTTP error 400 (Bad Request)`
-
-If you see an error like:
-
-```
-Failed to connect to MCP server 'streamable_http: https://mcp.slack.com/mcp': HTTP error 400 (Bad Request)
-```
-
-This means the Slack MCP feature has not been enabled for your app. There is no manifest property for this yet, so it must be toggled on manually:
-
-1. Run `slack app settings` to open your app's settings page (or visit [api.slack.com/apps](https://api.slack.com/apps) and select your app)
-2. Navigate to **Agents & AI Apps** in the left-side navigation
-3. Toggle **Slack Model Context Protocol** on
+- `store.py` — In-memory context store to preserve conversation histories inside Slack threads.
