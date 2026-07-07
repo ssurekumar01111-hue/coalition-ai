@@ -1,0 +1,51 @@
+[
+  {
+    "name": "Amit Sharma",
+    "skill": "teaching",
+    "location": "Lucknow",
+    "state": "Uttar Pradesh",
+    "active": true
+  },
+  {
+    "name": "Priya Gupta",
+    "skill": "coding",
+    "location": "Lucknow",
+    "state": "Uttar Pradesh",
+    "active": true
+  },
+  {
+    "name": "Rahul Verma",
+    "skill": "technical support",
+    "location": "Prayagraj",
+    "state": "Uttar Pradesh",
+    "active": true
+  },
+  {
+    "name": "Siddharth Singh",
+    "skill": "teaching",
+    "location": "Banda",
+    "state": "Uttar Pradesh",
+    "active": true
+  },
+  {
+    "name": "Vikram Rathore",
+    "skill": "logistics",
+    "location": "Kanpur",
+    "state": "Uttar Pradesh",
+    "active": true
+  },
+  {
+    "name": "Neha Mishra",
+    "skill": "coding",
+    "location": "Prayagraj",
+    "state": "Uttar Pradesh",
+    "active": false
+  },
+  {
+    "name": "Rajesh Kumar",
+    "skill": "teaching",
+    "location": "National",
+    "state": "National",
+    "active": true
+  }
+]

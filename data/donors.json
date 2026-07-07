@@ -1,0 +1,58 @@
+[
+  {
+    "name": "Lucknow Tech Foundation",
+    "type": "Corporate",
+    "capacity": 100,
+    "location": "Lucknow",
+    "state": "Uttar Pradesh",
+    "resources_offered": ["laptops", "tablets"]
+  },
+  {
+    "name": "Banda Educational Trust",
+    "type": "Trust",
+    "capacity": 50,
+    "location": "Banda",
+    "state": "Uttar Pradesh",
+    "resources_offered": ["books", "laptops"]
+  },
+  {
+    "name": "Prayagraj Digital Hub",
+    "type": "NGO",
+    "capacity": 30,
+    "location": "Prayagraj",
+    "state": "Uttar Pradesh",
+    "resources_offered": ["tablets", "internet"]
+  },
+  {
+    "name": "National Dev Corp",
+    "type": "Corporate",
+    "capacity": 500,
+    "location": "National",
+    "state": "National",
+    "resources_offered": ["laptops", "internet", "books"]
+  },
+  {
+    "name": "Kanpur CSR Alliance",
+    "type": "Corporate Alliance",
+    "capacity": 120,
+    "location": "Kanpur",
+    "state": "Uttar Pradesh",
+    "resources_offered": ["laptops", "books"]
+  },
+  {
+    "name": "Banda Tech Donors",
+    "type": "Foundation",
+    "capacity": 15,
+    "location": "Banda",
+    "state": "Uttar Pradesh",
+    "resources_offered": ["tablets"]
+  },
+  {
+    "name": "Kanpur STEM Foundation",
+    "type": "Corporate CSR",
+    "capacity": 40,
+    "location": "Kanpur",
+    "state": "Uttar Pradesh",
+    "resources_offered": ["workshops", "mentors", "training"]
+  }
+]

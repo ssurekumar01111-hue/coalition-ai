@@ -28,8 +28,8 @@ logs/
 # macOS
 .DS_Store
 
-# OAuth
-data/
+# Runtime-generated data (static seed files are committed)
+data/impact.json
 
 # Python
 __pycache__/

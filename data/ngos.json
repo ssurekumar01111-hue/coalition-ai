@@ -1,0 +1,44 @@
+[
+  {
+    "name": "Uttar Pradesh Education Initiative",
+    "focus_area": "education",
+    "location": "Lucknow",
+    "state": "Uttar Pradesh",
+    "verified": true
+  },
+  {
+    "name": "Lucknow Literacy Forum",
+    "focus_area": "literacy",
+    "location": "Lucknow",
+    "state": "Uttar Pradesh",
+    "verified": false
+  },
+  {
+    "name": "Prayagraj Coding Academy",
+    "focus_area": "technology",
+    "location": "Prayagraj",
+    "state": "Uttar Pradesh",
+    "verified": true
+  },
+  {
+    "name": "Banda Rural Dev Society",
+    "focus_area": "education",
+    "location": "Banda",
+    "state": "Uttar Pradesh",
+    "verified": true
+  },
+  {
+    "name": "National Literacy Mission",
+    "focus_area": "literacy",
+    "location": "National",
+    "state": "National",
+    "verified": true
+  },
+  {
+    "name": "Kanpur Digital Learners",
+    "focus_area": "technology",
+    "location": "Kanpur",
+    "state": "Uttar Pradesh",
+    "verified": true
+  }
+]

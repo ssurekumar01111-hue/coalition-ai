@@ -1,0 +1,37 @@
+[
+  {
+    "name": "UP State Education Fund",
+    "focus_area": "education",
+    "location_scope": "Lucknow",
+    "state": "Uttar Pradesh",
+    "deadline": "2026-07-15"
+  },
+  {
+    "name": "National Digital Literacy Grant",
+    "focus_area": "literacy",
+    "location_scope": "National",
+    "state": "National",
+    "deadline": "2026-08-30"
+  },
+  {
+    "name": "Banda Grassroots Fund",
+    "focus_area": "education",
+    "location_scope": "Banda",
+    "state": "Uttar Pradesh",
+    "deadline": "2026-08-15"
+  },
+  {
+    "name": "Prayagraj Tech Innovation Grant",
+    "focus_area": "technology",
+    "location_scope": "Prayagraj",
+    "state": "Uttar Pradesh",
+    "deadline": "2026-09-01"
+  },
+  {
+    "name": "Kanpur Skill Development Grant",
+    "focus_area": "technology",
+    "location_scope": "Kanpur",
+    "state": "Uttar Pradesh",
+    "deadline": "2026-09-01"
+  }
+]
