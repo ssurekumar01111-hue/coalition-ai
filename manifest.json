@@ -1,6 +1,6 @@
 {
   "display_information": {
-    "name": "Coalition AI",
+    "name": "Groundswell",
     "description": "Forms mission-driven coalitions of donors, NGOs, volunteers, and grants around educational needs."
   },
   "features": {
@@ -14,7 +14,7 @@
       "messages_tab_read_only_enabled": false
     },
     "bot_user": {
-      "display_name": "Coalition AI",
+      "display_name": "Groundswell",
       "always_online": true
     }
   },

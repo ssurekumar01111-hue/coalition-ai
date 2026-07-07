@@ -1,31 +1,31 @@
-# Casey: IT Support Agent (Bolt for Python and Pydantic)
+# Groundswell: AI Coalition Agent (Bolt for Python and Pydantic)
 
-Meet Casey (it/this/that) — an AI-powered IT support agent that lives in Slack. Casey can troubleshoot common issues, search knowledge base articles, reset passwords, check system status, and create support tickets, all without leaving the conversation.
+Meet Groundswell — an AI-powered coalition agent that lives in Slack. Groundswell autonomously assembles donors, NGOs, volunteers, and grants around educational needs, forming mission-driven coalitions in minutes, all without leaving the conversation.
 
-Built with [Bolt for Python](https://docs.slack.dev/tools/bolt-python/) and [Pydantic AI](https://ai.pydantic.dev/) using models from [Anthropic](https://anthropic.com) or [OpenAI](https://openai.com).
+Built with [Bolt for Python](https://docs.slack.dev/tools/bolt-python/) and [Pydantic AI](https://ai.pydantic.dev/) using models from [Anthropic](https://anthropic.com), [Google](https://ai.google.dev/), or [OpenAI](https://openai.com).
 
 ## App Overview
 
-Casey gives your team instant IT support through four entry points:
+Groundswell gives your team four ways to launch educational missions:
 
-* **App Home** — Users open Casey's Home tab and choose from common issue categories (Password Reset, Access Request, Software Help, Network Issues, Something Else). A modal collects details, then Casey starts a DM thread with a resolution.
-* **Direct Messages** — Users message Casey directly to describe any IT issue. Casey responds in-thread, maintaining context across follow-ups.
-* **Channel @mentions** — Users mention `@Casey` in any channel to get help without leaving the conversation.
-* **Assistant Panel** — Users click _Add Agent_ in Slack, select Casey, and pick from suggested prompts or describe an issue.
+* **App Home** — Users open Groundswell's Home tab and choose from need categories (Laptops & Devices, Books & Literacy, STEM Workshops, Mentorship, Other). A modal collects details, then Groundswell posts a coalition summary in a dedicated mission channel.
+* **Direct Messages** — Users message Groundswell directly to describe an educational need. Groundswell responds in-thread, maintaining context across follow-ups.
+* **Channel @mentions** — Users mention `@Groundswell` in any channel to describe a need and receive a coalition in-thread.
+* **Assistant Panel** — Users click _Add Agent_ in Slack, select Groundswell, and pick from suggested prompts or describe a need.
 
-Casey uses five simulated tools to assist users:
+Groundswell uses the Coalition MCP Server to assemble resources in real time:
 
-* **Knowledge Base Search** — Finds relevant articles for common topics like VPN, email, Wi-Fi, printers, and more.
-* **Support Ticket Creation** — Creates a tracked ticket when issues need human follow-up.
-* **Password Reset** — Triggers a password reset and confirms the action.
-* **System Status Check** — Reports the operational status of company systems.
-* **User Permissions Lookup** — Shows access levels and group memberships.
+* **Donor Search** — Finds matching donors for the resource type and location.
+* **NGO Partner Search** — Identifies NGO partners aligned with the mission focus area.
+* **Volunteer Search** — Surfaces active volunteers with the required skills.
+* **Grant Search** — Locates available grants by focus area and location.
+* **Build Coalition** — Assembles all of the above into a scored, actionable coalition summary.
 
-> **Note:** All tools return simulated data for demonstration purposes. In a production app, these would connect to your actual IT systems.
+> **Note:** All MCP tools query a local data layer. In production, these would connect to your live donor/NGO/grant databases.
 
 ### Slack MCP Server
 
-Casey also works with the [Slack MCP Server](https://docs.slack.dev/ai/slack-mcp-server), giving it the ability to search messages and files, read channel history and threads, send messages, schedule messages, and create or update Slack canvases. When deployed with OAuth (HTTP mode), Casey automatically connects to the Slack MCP Server using the user's token, unlocking these capabilities on top of the built-in IT tools.
+Groundswell also works with the [Slack MCP Server](https://docs.slack.dev/ai/slack-mcp-server), giving it the ability to search messages and files, read channel history and threads, send messages, schedule messages, and create or update Slack canvases. When deployed with OAuth (HTTP mode), Groundswell automatically connects to the Slack MCP Server using the user's token, unlocking these capabilities on top of the built-in coalition tools.
 
 ## Setup
 
@@ -251,17 +251,17 @@ python3 app_oauth.py
 
 ### Using the App
 
-Once Casey is running, there are several ways to interact:
+Once Groundswell is running, there are several ways to interact:
 
-**App Home** — Open Casey in Slack and click the _Home_ tab. You'll see five category buttons. Click one to open a modal, describe your issue, and submit. Casey will start a DM thread with you containing a diagnosis and next steps.
+**App Home** — Open Groundswell in Slack and click the _Home_ tab. You'll see need-category buttons. Click one to open a modal, describe your educational need, and submit. Groundswell will build a coalition and post the results to a dedicated mission channel.
 
-**Direct Messages** — Open a DM with Casey. You'll see suggested prompts like _Reset Password_, _Request Access_, and _Network Issues_ — pick one or describe your own issue. Casey will react with :eyes: while processing, then reply in a thread. Send follow-up messages in the same thread and Casey will maintain the full conversation context.
+**Direct Messages** — Open a DM with Groundswell and describe an educational need. Groundswell will react with :eyes: while processing, then reply in a thread with a full coalition summary. Send follow-up messages in the same thread and Groundswell will maintain the full conversation context.
 
-**Channel @mentions** — Invite Casey to a channel by typing `/invite @Casey` in the message box, then type `@Casey` followed by your issue. Casey responds in a thread so the channel stays clean.
+**Channel @mentions** — Invite Groundswell to a channel by typing `/invite @Groundswell` in the message box, then type `@Groundswell` followed by your need. Groundswell responds in a thread so the channel stays clean and automatically creates a mission channel for coordination.
 
-**Assistant Panel** — Click _Add Agent_ in the top-right corner of Slack, select Casey from the list, then pick a suggested prompt or type a message.
+**Assistant Panel** — Click _Add Agent_ in the top-right corner of Slack, select Groundswell from the list, then pick a suggested prompt or type a message.
 
-Casey will add a :white_check_mark: reaction when it believes an issue has been resolved, and occasionally adds a contextual emoji reaction to keep things friendly.
+Groundswell will add a :white_check_mark: reaction when it believes a mission has been resolved, and reacts with a contextual emoji to every message to keep things friendly.
 
 ### Linting
 
@@ -298,13 +298,13 @@ Every incoming request is routed to a "listener". This directory groups each lis
 **`/listeners/events`** — Handles incoming events:
 
 - `app_home_opened.py` — Publishes the App Home view with category buttons.
-- `app_mentioned.py` — Responds to `@Casey` mentions in channels.
+- `app_mentioned.py` — Responds to `@Groundswell` mentions in channels.
 - `message.py` — Responds to direct messages from users.
 
 **`/listeners/actions`** — Handles interactive components:
 
 - `category_buttons.py` — Opens the issue submission modal when a category button is clicked.
-- `feedback.py` — Handles thumbs up/down feedback on Casey's responses.
+- `feedback.py` — Handles thumbs up/down feedback on Groundswell's responses.
 
 **`/listeners/views`** — Handles view submissions and builds Block Kit views:
 
@@ -323,7 +323,7 @@ The `tools` directory contains five IT support tools that the agent can call dur
 
 ### `/thread_context`
 
-The `store.py` file implements a thread-safe in-memory conversation history store, keyed by channel and thread. This enables multi-turn conversations where Casey remembers previous context within a thread.
+The `store.py` file implements a thread-safe in-memory conversation history store, keyed by channel and thread. This enables multi-turn conversations where Groundswell remembers previous context within a thread.
 
 ## Troubleshooting
 

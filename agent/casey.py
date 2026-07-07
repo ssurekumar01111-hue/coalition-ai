@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 
+from fastmcp.client.transports import PythonStdioTransport
 from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPServerStreamableHTTP, MCPToolset
 
@@ -12,7 +13,7 @@ from agent.tools import (
 )
 
 COALITION_SYSTEM_PROMPT = """\
-You are Coalition AI, an AI assistant dedicated to forming mission-driven coalitions of \
+You are Groundswell, an AI assistant dedicated to forming mission-driven coalitions of \
 donors, NGOs, volunteers, and grants to address educational needs.
 
 ## PERSONALITY
@@ -112,8 +113,18 @@ SLACK_MCP_URL = "https://mcp.slack.com/mcp"
 # Resolve absolute path to coalition_mcp_server.py relative to the directory of this file
 server_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "coalition_mcp_server.py"))
 
+# Use explicit PythonStdioTransport so that any subprocess crash (e.g. ImportError,
+# ModuleNotFoundError) is written to sys.stderr and appears in Railway's log stream
+# instead of being silently swallowed behind "Failed to initialize server session".
+# env=os.environ.copy() ensures the subprocess inherits all env vars (API keys, etc.).
+_mcp_transport = PythonStdioTransport(
+    script_path=server_path,
+    env=os.environ.copy(),
+    log_file=sys.stderr,
+)
+
 coalition_toolset = MCPToolset(
-    str(server_path),
+    _mcp_transport,
     init_timeout=30.0,
 )
 

@@ -33,7 +33,7 @@ def handle_app_mentioned(
         if not cleaned_text:
             say(
                 text=(
-                    "Hey there! 👋 I'm Coalition AI. Describe an educational need "
+                    "Hey there! 👋 I'm Groundswell. Describe an educational need "
                     "(e.g. 'we need 50 laptops for students in Lucknow') and I'll "
                     "autonomously assemble a coalition of donors, NGOs, volunteers, "
                     "and grants to address it."

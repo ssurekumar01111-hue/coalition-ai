@@ -38,7 +38,7 @@ def build_issue_modal(category: str) -> dict:
                     "type": "mrkdwn",
                     "text": (
                         f"*Need type:* {category}\n\n"
-                        "Describe your need in detail — Coalition AI will "
+                        "Describe your need in detail — Groundswell will "
                         "assemble donors, NGOs, volunteers, and grants "
                         "around it."
                     ),

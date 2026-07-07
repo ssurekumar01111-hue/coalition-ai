@@ -41,7 +41,7 @@ def handle_issue_submission(
         # Post a "thinking" indicator
         thinking = client.chat_postMessage(
             channel=GENERAL_CHANNEL_ID,
-            text="👀 Coalition AI is assembling your coalition...",
+            text="👀 Groundswell is assembling your coalition...",
             thread_ts=None,
         )
         thread_ts = thinking["ts"]

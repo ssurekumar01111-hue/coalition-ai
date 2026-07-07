@@ -1,4 +1,5 @@
 import logging
+import logging.handlers
 import os
 
 from dotenv import load_dotenv
@@ -13,6 +14,18 @@ load_dotenv(dotenv_path=".env", override=False)
 get_model()  # Fail fast if no AI provider key is configured
 
 logging.basicConfig(level=logging.DEBUG)
+
+# Persist logs to disk so runtime warnings survive terminal scroll/close.
+# logs/ is in .gitignore — these files are never committed.
+os.makedirs("logs", exist_ok=True)
+_fh = logging.handlers.RotatingFileHandler(
+    "logs/app.log", maxBytes=5_000_000, backupCount=3
+)
+_fh.setLevel(logging.DEBUG)
+_fh.setFormatter(logging.Formatter(
+    "%(asctime)s %(levelname)s %(name)s %(message)s"
+))
+logging.getLogger().addHandler(_fh)
 
 app = App(
     token=os.environ.get("SLACK_BOT_TOKEN"),

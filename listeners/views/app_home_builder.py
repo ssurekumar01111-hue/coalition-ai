@@ -44,7 +44,7 @@ def build_app_home_view(
             "type": "header",
             "text": {
                 "type": "plain_text",
-                "text": "👋 Welcome to Coalition AI",
+                "text": "👋 Welcome to Groundswell",
             },
         },
         {
