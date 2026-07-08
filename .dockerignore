@@ -4,4 +4,3 @@ __pycache__/
 .env
 logs/
 .git/
-data/impact.json
