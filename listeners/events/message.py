@@ -140,7 +140,7 @@ def handle_message(
                 
                 thread_history = conversation_store.get_history(channel_id, thread_ts)
                 import time
-                MAX_MCP_RETRIES = 2
+                MAX_MCP_RETRIES = 1
                 result = None
                 last_error = None
                 for attempt in range(MAX_MCP_RETRIES + 1):
@@ -240,7 +240,7 @@ def handle_message(
 
 
         import time
-        MAX_MCP_RETRIES = 2
+        MAX_MCP_RETRIES = 1
         result = None
         last_error = None
         for attempt in range(MAX_MCP_RETRIES + 1):

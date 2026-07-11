@@ -60,7 +60,7 @@ def handle_issue_submission(
             f"Modal submission - running agent with message: {full_message}"
         )
         import time
-        MAX_MCP_RETRIES = 2
+        MAX_MCP_RETRIES = 1
         result = None
         last_error = None
         for attempt in range(MAX_MCP_RETRIES + 1):

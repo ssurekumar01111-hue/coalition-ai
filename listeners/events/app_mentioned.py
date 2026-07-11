@@ -76,7 +76,7 @@ def handle_app_mentioned(
             user_token=context.user_token,
         )
         import time
-        MAX_MCP_RETRIES = 2
+        MAX_MCP_RETRIES = 1
         result = None
         last_error = None
         for attempt in range(MAX_MCP_RETRIES + 1):

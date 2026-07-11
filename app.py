@@ -1,6 +1,8 @@
 import logging
 import logging.handlers
 import os
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
 from dotenv import load_dotenv
 from slack_bolt import App
@@ -12,6 +14,23 @@ from listeners import register_listeners
 
 load_dotenv(dotenv_path=".env", override=False)
 get_model()  # Fail fast if no AI provider key is configured
+
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/plain")
+        self.end_headers()
+        self.wfile.write(b"OK")
+    def log_message(self, format, *args):
+        pass  # suppress noisy request logs
+
+def start_health_server():
+    port = int(os.environ.get("PORT", 8080))
+    server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
+    server.serve_forever()
+
+# Start health check server in background thread before Socket Mode starts
+threading.Thread(target=start_health_server, daemon=True).start()
 
 logging.basicConfig(level=logging.DEBUG)
 

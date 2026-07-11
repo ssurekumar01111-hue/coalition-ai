@@ -71,8 +71,8 @@ class TestMCPRetry:
             set_status=self.fake_set_status
         )
         
-        assert mock_run_agent.call_count == 3  # Attempt 1 + 2 retries
-        assert mock_sleep.call_count == 2
+        assert mock_run_agent.call_count == 2  # Attempt 1 + 1 retry
+        assert mock_sleep.call_count == 1
         
         # Confirm that the error was caught and posted to the channel
         self.fake_say.assert_called_with(
