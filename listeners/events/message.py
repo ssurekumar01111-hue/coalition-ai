@@ -32,6 +32,12 @@ def handle_message(
     if event.get("bot_id") and not is_issue_submission:
         return
 
+    # Skip if the bot itself is mentioned in the message text.
+    # App mention events in threads are handled by app_mentioned.py instead,
+    # to avoid concurrent execution and collision on the shared MCP transport.
+    if context.bot_user_id and f"<@{context.bot_user_id}>" in event.get("text", ""):
+        return
+
     is_dm = event.get("channel_type") == "im"
     is_thread_reply = event.get("thread_ts") is not None
 
