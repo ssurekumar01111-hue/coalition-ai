@@ -121,6 +121,7 @@ _mcp_transport = PythonStdioTransport(
     script_path=server_path,
     env=os.environ.copy(),
     log_file=sys.stderr,
+    keep_alive=False,
 )
 
 coalition_toolset = MCPToolset(
