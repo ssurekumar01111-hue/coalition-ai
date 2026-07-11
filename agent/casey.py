@@ -135,7 +135,7 @@ coalition_agent = Agent(
         add_emoji_reaction,
         mark_resolved,
     ],
-    retries=5,
+    retries=8,
     model_settings={
         "google_safety_settings": [
             {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
