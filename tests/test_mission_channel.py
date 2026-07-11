@@ -79,6 +79,7 @@ class TestCreateMissionChannelNewChannel:
         client.conversations_canvases_create.assert_called_once()
         args = client.conversations_canvases_create.call_args.kwargs
         assert args["channel_id"] == "C_NEW123"
+        assert args["title"] == "Laptops for Lucknow"
 
 
 # ── name_taken: ID in error body ──────────────────────────────────────────────
@@ -118,6 +119,7 @@ class TestNameTakenWithIdInErrorBody:
         client.conversations_canvases_create.assert_called_once()
         args = client.conversations_canvases_create.call_args.kwargs
         assert args["channel_id"] == "C_EXISTING"
+        assert args["title"] == "Laptops for Lucknow"
 
 
 # ── name_taken: no ID in body → fallback to conversations_list ───────────────

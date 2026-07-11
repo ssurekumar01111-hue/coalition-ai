@@ -43,6 +43,20 @@ _Post mission updates here as the coalition progresses._
 """
 
 
+def _build_chat_summary(resource_type: str, location: str,
+                        coalition_result: str) -> str:
+    """Build a Slack-mrkdwn-formatted summary for the initial
+    chat message (different syntax than the Canvas's standard
+    markdown)."""
+    return (
+        f":rocket: *Mission Launched: {resource_type.title()} "
+        f"for {location}*\n\n"
+        f"{coalition_result}\n\n"
+        f"_This mission channel was automatically created by "
+        f"Groundswell._"
+    )
+
+
 def create_mission_channel(client, coalition_result: str, 
                            location: str, resource_type: str,
                            team_id: str) -> str | None:
@@ -106,15 +120,12 @@ def create_mission_channel(client, coalition_result: str,
 
     if channel_id:
         try:
+            chat_text = _build_chat_summary(
+                resource_type, location, coalition_result
+            )
             client.chat_postMessage(
                 channel=channel_id,
-                text=(
-                    f"🚀 *Mission Launched: {resource_type.title()} for "
-                    f"{location}*\n\n"
-                    f"{coalition_result}\n\n"
-                    f"_This mission channel was automatically created by "
-                    f"Groundswell._"
-                )
+                text=chat_text
             )
 
             # Create a structured Canvas in the mission channel
@@ -127,7 +138,8 @@ def create_mission_channel(client, coalition_result: str,
                     document_content={
                         "type": "markdown",
                         "markdown": canvas_content
-                    }
+                    },
+                    title=f"{resource_type.title()} for {location}"
                 )
             except Exception as e:
                 logger.warning(f"Canvas creation failed: {e}")
