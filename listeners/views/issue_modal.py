@@ -59,7 +59,30 @@ def handle_issue_submission(
         logger.info(
             f"Modal submission - running agent with message: {full_message}"
         )
-        result = run_coalition_agent(full_message, deps, message_history=None)
+        import time
+        MAX_MCP_RETRIES = 2
+        result = None
+        last_error = None
+        for attempt in range(MAX_MCP_RETRIES + 1):
+            try:
+                result = run_coalition_agent(full_message, deps, message_history=None)
+                break  # success, exit retry loop
+            except Exception as e:
+                last_error = e
+                error_str = str(e)
+                if "Failed to initialize server session" in error_str or \
+                   "Client failed to connect" in error_str:
+                    if attempt < MAX_MCP_RETRIES:
+                        logger.warning(
+                            f"MCP connection failed (attempt {attempt + 1}/"
+                            f"{MAX_MCP_RETRIES + 1}), retrying silently: {e}"
+                        )
+                        time.sleep(2)  # brief pause before retry
+                        continue
+                raise  # re-raise if not an MCP error, or retries exhausted
+        
+        if result is None:
+            raise last_error
 
         # Post result to #general as a thread reply
         client.chat_postMessage(
