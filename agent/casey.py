@@ -125,7 +125,7 @@ _mcp_transport = PythonStdioTransport(
 
 coalition_toolset = MCPToolset(
     _mcp_transport,
-    init_timeout=30.0,
+    init_timeout=60.0,
 )
 
 coalition_agent = Agent(
