@@ -101,7 +101,7 @@ def find_donors(resource_type: str, location: str = None) -> str:
     for d in matches:
         offered_str = ", ".join(d.get("resources_offered", []))
         lines.append(
-            f"- **{d['name']}** ({d['type']}) | Capacity: {d['capacity']} | Location: {d['location']} (Offered: {offered_str})"
+            f"- *{d['name']}* ({d['type']}) | Capacity: {d['capacity']} | Location: {d['location']} (Offered: {offered_str})"
         )
     return "\n".join(lines)
 
@@ -125,7 +125,7 @@ def find_ngos(focus_area: str, location: str = None) -> str:
     for n in matches:
         verified_str = "Verified ✅" if n.get("verified", False) else "Unverified"
         lines.append(
-            f"- **{n['name']}** | Location: {n['location']} | Status: {verified_str}"
+            f"- *{n['name']}* | Location: {n['location']} | Status: {verified_str}"
         )
     return "\n".join(lines)
 
@@ -148,7 +148,7 @@ def find_volunteers(skill: str, location: str = None) -> str:
     lines = [f"Found {len(volunteers)} active volunteer(s) with skill '{skill}':"]
     for v in matches:
         lines.append(
-            f"- **{v['name']}** | Skill: {v['skill']} | Location: {v['location']}"
+            f"- *{v['name']}* | Skill: {v['skill']} | Location: {v['location']}"
         )
     return "\n".join(lines)
 
@@ -173,7 +173,7 @@ def find_grants(focus_area: str, location: str = None) -> str:
         lines = [f"Found {len(seeded_grants)} grant(s) for '{focus_area}':"]
         for g in matches:
             lines.append(
-                f"- **{g['name']}** | Scope: {g['location_scope']} "
+                f"- *{g['name']}* | Scope: {g['location_scope']} "
                 f"| Deadline: {g['deadline']}"
             )
         return "\n".join(lines)
@@ -196,7 +196,7 @@ def find_grants(focus_area: str, location: str = None) -> str:
         scope = g.get("location_scope", "N/A")
         deadline = g.get("deadline", "N/A")
         lines.append(
-            f"- **{g['name']}**{source_tag} | Scope: {scope} "
+            f"- *{g['name']}*{source_tag} | Scope: {scope} "
             f"| Deadline: {deadline}"
         )
     if any(g.get("_ai_generated") for g in all_grants[:3]):
@@ -278,30 +278,30 @@ def build_coalition(resource_type: str, focus_area: str, location: str) -> str:
     )
 
     lines = [
-        f"### 🤝 Recommended Coalition for {location} ({resource_type.capitalize()} Need)",
+        f"*🤝 Recommended Coalition for {location} ({resource_type.capitalize()} Need)*",
         ""
     ]
     
     if selected_donor:
-        lines.append(f"- **Donor**: {selected_donor['name']} ({selected_donor['type']}) | Capacity: {selected_donor['capacity']} | Location: {selected_donor['location']}")
+        lines.append(f"- *Donor*: {selected_donor['name']} ({selected_donor['type']}) | Capacity: {selected_donor['capacity']} | Location: {selected_donor['location']}")
     else:
-        lines.append("- **Donor**: None matching found")
+        lines.append("- *Donor*: None matching found")
         
     if selected_ngo:
         verified_tag = "Verified ✅" if selected_ngo.get("verified", False) else "Unverified"
-        lines.append(f"- **NGO Partner**: {selected_ngo['name']} | Location: {selected_ngo['location']} | Status: {verified_tag}")
+        lines.append(f"- *NGO Partner*: {selected_ngo['name']} | Location: {selected_ngo['location']} | Status: {verified_tag}")
     else:
-        lines.append("- **NGO Partner**: None matching found")
+        lines.append("- *NGO Partner*: None matching found")
 
-    lines.append(f"- **Volunteers**: Found {vol_count} active volunteer(s) with skill '{skill}'")
+    lines.append(f"- *Volunteers*: Found {vol_count} active volunteer(s) with skill '{skill}'")
     
     if selected_grant:
-        lines.append(f"- **Grant Support**: {selected_grant['name']} | Deadline: {selected_grant['deadline']} | Scope: {selected_grant['location_scope']}")
+        lines.append(f"- *Grant Support*: {selected_grant['name']} | Deadline: {selected_grant['deadline']} | Scope: {selected_grant['location_scope']}")
     else:
-        lines.append("- **Grant Support**: None matching found")
+        lines.append("- *Grant Support*: None matching found")
 
     lines.append("")
-    lines.append(f"**Coalition Score**: {final_score}/100")
+    lines.append(f"*Coalition Score*: {final_score}/100")
     lines.append(
         f"- _Proximity (30%)_: {int(proximity_score)} | "
         f"_Capacity (25%)_: {int(capacity_score)} | "
