@@ -2,6 +2,8 @@
 
 Meet Groundswell — an AI-powered coalition agent that lives in Slack. Groundswell autonomously assembles donors, NGOs, volunteers, and grants around educational needs, forming mission-driven coalitions in minutes, all without leaving the conversation.
 
+![Groundswell Architecture](./assets/architecture.png)
+
 Built with [Bolt for Python](https://docs.slack.dev/tools/bolt-python/) and [Pydantic AI](https://ai.pydantic.dev/) using models from [Google](https://ai.google.dev/), [Anthropic](https://anthropic.com), or [OpenAI](https://openai.com).
 
 ## App Overview
